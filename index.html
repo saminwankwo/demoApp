@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAT Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col">
+  <header class="bg-white shadow p-4 flex justify-between items-center">
+    <h1 class="text-xl font-semibold">RAT Demo</h1>
+    <button id="connectBtn" class="bg-green-600 text-white px-3 py-1 rounded">Connect</button>
+  </header>
+
+  <div id="terminal" class="flex-1 p-4 bg-black text-green-400 font-mono whitespace-pre-wrap overflow-y-auto">
+    Click Connect to start.
+  </div>
+
+  <div class="p-4 bg-white">
+    <input id="cmdInput" type="text" placeholder="Enter command..."
+      class="w-full p-2 border rounded font-mono" disabled />
+  </div>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:8080');
+    const connectBtn = document.getElementById('connectBtn');
+    const terminal = document.getElementById('terminal');
+    const cmdInput = document.getElementById('cmdInput');
+    let connected = false;
+
+    ws.onopen = () => appendLine('🗸 WebSocket connected.');
+    ws.onmessage = e => appendLine(e.data);
+    ws.onclose = () => appendLine('⚠️ WebSocket disconnected.');
+
+    connectBtn.onclick = () => {
+      if (!connected) {
+        ws.send(JSON.stringify({ type: 'connect' }));
+      } else {
+        ws.send(JSON.stringify({ type: 'disconnect' }));
+      }
+      connected = !connected;
+      connectBtn.textContent = connected ? 'Disconnect' : 'Connect';
+      cmdInput.disabled = !connected;
+    };
+
+    cmdInput.onkeydown = e => {
+      if (e.key === 'Enter' && cmdInput.value.trim()) {
+        const cmd = cmdInput.value.trim();
+        appendLine(`$ ${cmd}`);
+        ws.send(JSON.stringify({ type: 'cmd', data: cmd }));
+        cmdInput.value = '';
+      }
+    };
+
+    function appendLine(text) {
+      terminal.textContent += '\n' + text;
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+  </script>
+</body>
+</html>
