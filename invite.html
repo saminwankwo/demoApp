@@ -1,0 +1,30 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start Remote Access Session</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded shadow max-w-md text-center">
+    <h1 class="text-xl font-bold mb-4">You've been invited to a demo remote access session</h1>
+    <p class="mb-6">By clicking below, you'll launch a lightweight terminal access agent. You may close the terminal at any time to end the session.</p>
+    <button id="startBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Start Secure Session</button>
+    <p id="msg" class="mt-4 text-sm text-gray-500"></p>
+  </div>
+
+  <script>
+    document.getElementById('startBtn').onclick = () => {
+      const msg = document.getElementById('msg');
+      msg.innerText = 'Launching...';
+      fetch('https://raw.githubusercontent.com/saminwankwo/demoApp/main/agent.sh')
+        .then(res => res.text())
+        .then(script => {
+          msg.innerText = 'Please copy and run this command in your terminal:';
+          msg.innerHTML += `<pre class="bg-gray-100 mt-2 p-2 text-left text-sm">bash -c \"$(curl -fsSL https://raw.githubusercontent.com/saminwankwo/demoApp/main/agent.sh)\"</pre>`;
+        });
+    };
+  </script>
+</body>
+</html>
